@@ -1,0 +1,120 @@
+<!-- templates/admin_view_complaint.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Complaint - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 { color: #1a237e; margin-bottom: 20px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-bottom: 20px; }
+        .label { font-weight: 600; color: #555; }
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #ff6f00, #e65100);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .back-btn {
+            background: #1a237e;
+            display: inline-block;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        video { max-width: 100%; border-radius: 10px; margin-top: 10px; }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .status-Pending { background: #ff9800; color: white; }
+        .status-Under-Investigation { background: #2196f3; color: white; }
+        .status-Resolved { background: #4caf50; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>📄 Complaint Details</h2>
+            <div class="info-grid">
+                <div class="label">Complaint ID:</div><div>{{ complaint.complaint_id }}</div>
+                <div class="label">Category:</div><div>{{ complaint.category }}</div>
+                <div class="label">Status:</div><div><span class="status-badge status-{{ complaint.status.replace(' ', '-') }}">{{ complaint.status }}</span></div>
+                <div class="label">Filed On:</div><div>{{ complaint.created_at.strftime('%d-%m-%Y %H:%M') }}</div>
+                <div class="label">Assigned To:</div><div>{{ complaint.assigned_to }}</div>
+                <div class="label">Anonymous:</div><div>{% if complaint.is_anonymous %}Yes 🛡️{% else %}No{% endif %}</div>
+                {% if not complaint.is_anonymous %}
+                    <div class="label">Contact:</div><div>{{ complaint.user_phone or '' }} {{ complaint.user_email or '' }}</div>
+                {% endif %}
+                <div class="label">Location:</div><div><a href="https://maps.google.com/?q={{ complaint.location_lat }},{{ complaint.location_lng }}" target="_blank">View on Map</a><br>{{ complaint.address or '' }}</div>
+                <div class="label">Description:</div><div>{{ complaint.description }}</div>
+            </div>
+        </div>
+        
+        {% if complaint.video_filename %}
+        <div class="card">
+            <h3>🎥 Evidence Video</h3>
+            <video controls src="{{ url_for('static', filename='uploads/' + complaint.video_filename) }}"></video>
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <h3>✏️ Update Status</h3>
+            <form id="updateForm">
+                <input type="hidden" name="complaint_id" value="{{ complaint.id }}">
+                <label>Status:</label>
+                <select name="status" id="status">
+                    <option value="Pending" {% if complaint.status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Under Investigation" {% if complaint.status == 'Under Investigation' %}selected{% endif %}>Under Investigation</option>
+                    <option value="Resolved" {% if complaint.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                </select>
+                <label>Remarks:</label>
+                <textarea name="remarks" rows="3" placeholder="Add official remarks...">{{ complaint.remarks or '' }}</textarea>
+                <button type="submit">Update Status</button>
+                <a href="/admin/dashboard" class="back-btn" style="background:#1a237e; padding:12px 25px; border-radius:8px; color:white; text-decoration:none;">← Back to Dashboard</a>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('updateForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/admin/update-status', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.success) {
+                alert('Status updated successfully!');
+                location.reload();
+            } else {
+                alert('Error updating status');
+            }
+        });
+    </script>
+</body>
+</>

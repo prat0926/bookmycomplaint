@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Complaints - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f0f2f5;
+        }
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #1a237e, #0d1b5e);
+            color: white;
+            position: fixed;
+            height: 100%;
+            padding: 20px;
+        }
+        .sidebar h2 { margin-bottom: 30px; text-align: center; }
+        .sidebar nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active { background: #ff6f00; }
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .filters select, .filters input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .complaints-table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background: #f5f5f5; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-Pending { background: #ff9800; color: white; }
+        .status-Under-Investigation { background: #2196f3; color: white; }
+        .status-Resolved { background: #4caf50; color: white; }
+        .btn-view { background: #1a237e; color: white; padding: 5px 15px; border-radius: 5px; text-decoration: none; font-size: 12px; }
+        .logout-btn { background: #d32f2f; color: white; padding: 8px 20px; border-radius: 5px; text-decoration: none; }
+        .pagination { margin-top: 20px; text-align: center; }
+        .pagination a { margin: 0 5px; padding: 5px 10px; background: #1a237e; color: white; text-decoration: none; border-radius: 5px; }
+    /* Add this to your <style> */
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .filters select, .filters input, .filters button {
+        width: 100%;
+    }
+    .complaints-table {
+        overflow-x: auto;
+    }
+    .complaints-table table {
+        min-width: 650px;
+    }
+}
+@media (max-width: 480px) {
+    .header { flex-direction: column; text-align: center; gap: 10px; }
+}
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>📋 Book My Complaint</h2>
+        <nav>
+            <a href="/admin/dashboard">📊 Dashboard</a>
+            <a href="/admin/all-complaints" class="active">📝 All Complaints</a>
+            <a href="/admin/police-stations">👮 Police Stations</a>
+            <a href="/admin/settings">⚙️ Settings</a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <h2>All Complaints</h2>
+            <a href="/admin/logout" class="logout-btn">Logout</a>
+        </div>
+        
+        <div class="filters">
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="Traffic">Traffic</option>
+                <option value="Civil">Civil</option>
+            </select>
+            <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Under Investigation">Under Investigation</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+            <input type="text" id="searchId" placeholder="Search by Complaint ID">
+            <button onclick="applyFilters()">Apply Filter</button>
+            <button onclick="resetFilters()">Reset</button>
+        </div>
+        
+        <div class="complaints-table">
+            <table id="complaintsTable">
+                <thead>
+                    <tr><th>ID</th><th>Date</th><th>Category</th><th>Description</th><th>Status</th><th>Assigned To</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for c in complaints %}
+                    <tr>
+                        <td>{{ c.complaint_id }}</td>
+                        <td>{{ c.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ c.category }}</td>
+                        <td>{{ c.description[:60] }}...</td>
+                        <td><span class="status-badge status-{{ c.status.replace(' ', '-') }}">{{ c.status }}</span></td>
+                        <td>{{ c.assigned_to }}</td>
+                        <td><a href="/admin/complaint/{{ c.id }}" class="btn-view">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function applyFilters() {
+            const category = document.getElementById('categoryFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const searchId = document.getElementById('searchId').value;
+            window.location.href = `/admin/all-complaints?category=${category}&status=${status}&search=${searchId}`;
+        }
+        function resetFilters() {
+            window.location.href = '/admin/all-complaints';
+        }
+    </script>
+</body>
+</html>

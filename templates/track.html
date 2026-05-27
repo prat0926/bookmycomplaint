@@ -1,0 +1,74 @@
+<!-- templates/track.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Complaint - Book My Complaint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg');
+            background-size: cover;
+            min-height: 100vh;
+        }
+        .header { background: linear-gradient(135deg, #1a237e, #0d1b5e); color: white; padding: 15px 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .track-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 50px auto;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .track-card h1 { color: #1a237e; margin-bottom: 10px; }
+        .input-group { margin: 30px 0; }
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: monospace;
+            text-align: center;
+        }
+        button {
+            background: linear-gradient(135deg, #ff6f00, #e65100);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        .back-link { display: inline-block; margin-top: 20px; color: #ff6f00; text-decoration: none; }
+        .error { color: #c62828; background: #ffebee; padding: 10px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container" style="max-width: 1200px;"><h2>📋 Track Your Complaint</h2></div>
+    </div>
+    <div class="container">
+        <div class="track-card">
+            <h1>🔍 Track Complaint Status</h1>
+            <p>Enter your 15-digit Complaint ID</p>
+            <form method="POST">
+                <div class="input-group">
+                    <input type="text" name="complaint_id" placeholder="e.g., BMC20241201120000a1b2" required>
+                </div>
+                <button type="submit">Track Complaint</button>
+            </form>
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

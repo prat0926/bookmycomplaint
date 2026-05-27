@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Register Complaint - Book My Complaint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg');
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        .header { background: linear-gradient(135deg, #1a237e, #0d1b5e); color: white; padding: 15px 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .form-title { font-size: 28px; color: #1a237e; margin-bottom: 10px; text-align: center; }
+        .form-subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+        select, textarea, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        select:focus, textarea:focus, input:focus { outline: none; border-color: #ff6f00; }
+        textarea { resize: vertical; min-height: 100px; }
+        .location-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .video-section {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .video-section:hover { border-color: #ff6f00; background: #fff8f0; }
+        .video-preview { margin-top: 15px; display: none; }
+        video { max-width: 100%; border-radius: 10px; }
+        .anonymous-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .anonymous-check input { width: auto; }
+        .contact-fields {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #ff6f00, #e65100);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .btn-submit:hover { transform: translateY(-2px); }
+        .back-link { display: inline-block; margin-top: 20px; color: #ff6f00; text-decoration: none; }
+        .alert { padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .loading { display: none; text-align: center; margin-top: 20px; }
+        .record-btn {
+            background: #d32f2f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        /* Persistent result box */
+        #resultContainer {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        #resultContainer h3 { color: #2e7d32; margin-bottom: 10px; }
+        #resultContainer p { margin: 8px 0; }
+        #resultContainer button { margin-top: 10px; }
+        @media (max-width: 768px) {
+            .form-container { padding: 20px; margin: 15px; }
+            .form-title { font-size: 24px; }
+            input, select, textarea, button { font-size: 16px; }
+            .btn-submit { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container" style="max-width: 1200px;"><h2>📝 Book My Complaint</h2></div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h1 class="form-title">Register New Complaint</h1>
+            <p class="form-subtitle">Fill the details below. Your complaint will be forwarded to the nearest police station.</p>
+
+            <!-- Persistent result container for Complaint ID -->
+            <div id="resultContainer">
+                <h3>✅ Complaint Registered Successfully!</h3>
+                <p><strong>Complaint ID:</strong> <span id="complaintIdDisplay" style="font-family: monospace; font-size: 18px; background: #fff; padding: 4px 8px; border-radius: 5px;"></span></p>
+                <p><strong>Assigned To:</strong> <span id="assignedToDisplay"></span></p>
+                <p>📌 Please save this Complaint ID to track your complaint.</p>
+                <button id="closeResultBtn" style="background: #4caf50; color: white; border: none; padding: 6px 15px; border-radius: 5px; cursor: pointer;">Dismiss</button>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <form id="complaintForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>📍 Complaint Category *</label>
+                    <select id="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Traffic">🚗 Traffic Complaint</option>
+                        <option value="Civil">🏢 Civil Issue</option>
+                    </select>
+                    <small style="color: #d32f2f; display: block; margin-top: 5px;">⚠️ For Emergency, please call 112 immediately</small>
+                </div>
+
+                <div class="form-group">
+                    <label>📝 Complaint Description *</label>
+                    <textarea id="description" placeholder="Describe your complaint in detail..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>📍 Your Location *</label>
+                    <button type="button" id="getLocationBtn" style="background:#1a237e; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">📍 Get My Current Location</button>
+                    <div id="locationInfo" class="location-box" style="margin-top: 10px;">
+                        <p id="locationStatus">Click the button to get your location</p>
+                        <input type="hidden" id="location_lat">
+                        <input type="hidden" id="location_lng">
+                        <input type="hidden" id="address">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🎥 Video Evidence (Max 15 seconds, MP4/WebM)</label>
+                    <div id="videoSection" class="video-section">
+                        <p>📹 Click to record video (Mobile) or upload file (Desktop)</p>
+                        <input type="file" id="videoFile" accept="video/*" style="display:none;">
+                        <div id="videoPreview" class="video-preview"></div>
+                    </div>
+                    <small>On mobile: Camera will open. On desktop: Choose video file. Max 15 seconds.</small>
+                </div>
+
+                <div class="anonymous-check">
+                    <input type="checkbox" id="anonymous">
+                    <label style="margin:0;">🛡️ Remain Anonymous (Hide my identity)</label>
+                </div>
+
+                <div id="contactFields" class="contact-fields">
+                    <div class="form-group">
+                        <label>📞 Phone Number</label>
+                        <input type="tel" id="phone" placeholder="Enter your phone number">
+                    </div>
+                    <div class="form-group">
+                        <label>📧 Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email address">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">✅ Submit Complaint</button>
+            </form>
+            <div class="loading" id="loading">Submitting complaint... Please wait...</div>
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        let videoBlob = null;
+
+        // Location detection
+        document.getElementById('getLocationBtn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                document.getElementById('locationStatus').innerHTML = 'Getting location...';
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                document.getElementById('locationStatus').innerHTML = 'Geolocation not supported';
+            }
+        });
+
+        function showPosition(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            document.getElementById('location_lat').value = lat;
+            document.getElementById('location_lng').value = lng;
+            document.getElementById('locationStatus').innerHTML = `📍 Location captured: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.display_name) {
+                        document.getElementById('address').value = data.display_name;
+                        document.getElementById('locationStatus').innerHTML += `<br>🏠 ${data.display_name.substring(0, 100)}`;
+                    }
+                })
+                .catch(err => console.log('Geocoding error:', err));
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById('locationStatus').innerHTML = 'Location access denied. Please enable location services.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById('locationStatus').innerHTML = 'Location unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById('locationStatus').innerHTML = 'Location request timeout.';
+                    break;
+            }
+        }
+
+        // Video handling
+        const videoSection = document.getElementById('videoSection');
+        const videoFile = document.getElementById('videoFile');
+        
+        videoSection.addEventListener('click', function() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                videoFile.setAttribute('capture', 'environment');
+                videoFile.setAttribute('accept', 'video/*');
+                videoFile.click();
+            } else {
+                videoFile.removeAttribute('capture');
+                videoFile.setAttribute('accept', 'video/*');
+                videoFile.click();
+            }
+        });
+
+        videoFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.onloadedmetadata = function() {
+                    window.URL.revokeObjectURL(video.src);
+                    if (video.duration > 15) {
+                        alert('Video exceeds 15 seconds. Please record a shorter video.');
+                        videoFile.value = '';
+                        videoBlob = null;
+                        document.getElementById('videoPreview').innerHTML = '';
+                        document.getElementById('videoPreview').style.display = 'none';
+                        return;
+                    }
+                    videoBlob = file;
+                    const preview = document.getElementById('videoPreview');
+                    preview.innerHTML = `<video controls src="${URL.createObjectURL(file)}"></video><p>✅ Video selected: ${file.name} (${Math.round(video.duration)} sec)</p>`;
+                    preview.style.display = 'block';
+                };
+                video.src = URL.createObjectURL(file);
+            }
+        });
+
+        // Anonymous toggle
+        document.getElementById('anonymous').addEventListener('change', function(e) {
+            const contactFields = document.getElementById('contactFields');
+            if (e.target.checked) {
+                contactFields.style.display = 'none';
+                document.getElementById('phone').required = false;
+                document.getElementById('email').required = false;
+            } else {
+                contactFields.style.display = 'block';
+            }
+        });
+
+        // Close result container
+        document.getElementById('closeResultBtn').addEventListener('click', function() {
+            document.getElementById('resultContainer').style.display = 'none';
+        });
+
+        // Form submission
+        document.getElementById('complaintForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+            const lat = document.getElementById('location_lat').value;
+            const lng = document.getElementById('location_lng').value;
+            
+            if (!category || !description || !lat || !lng) {
+                showAlert('Please fill all required fields and get your location.', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('category', category);
+            formData.append('description', description);
+            formData.append('location_lat', lat);
+            formData.append('location_lng', lng);
+            formData.append('address', document.getElementById('address').value);
+            formData.append('is_anonymous', document.getElementById('anonymous').checked);
+            
+            if (!document.getElementById('anonymous').checked) {
+                formData.append('user_phone', document.getElementById('phone').value);
+                formData.append('user_email', document.getElementById('email').value);
+            }
+            
+            if (videoBlob) {
+                formData.append('video', videoBlob);
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const response = await fetch('/submit-complaint', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show persistent result with complaint ID
+                    document.getElementById('complaintIdDisplay').innerText = result.complaint_id;
+                    document.getElementById('assignedToDisplay').innerText = result.assigned_to;
+                    document.getElementById('resultContainer').style.display = 'block';
+                    
+                    // Also show a temporary alert for immediate feedback
+                    showAlert(`Complaint Registered! ID: ${result.complaint_id}`, 'success');
+                    
+                    // Reset form but keep the result visible
+                    document.getElementById('complaintForm').reset();
+                    document.getElementById('videoPreview').innerHTML = '';
+                    document.getElementById('videoPreview').style.display = 'none';
+                    videoBlob = null;
+                    document.getElementById('location_lat').value = '';
+                    document.getElementById('location_lng').value = '';
+                    document.getElementById('locationStatus').innerHTML = 'Click the button to get your location';
+                    document.getElementById('contactFields').style.display = 'none';
+                    document.getElementById('anonymous').checked = false;
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type === 'error' ? 'error' : 'success'}`;
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

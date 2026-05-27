@@ -1,0 +1,81 @@
+<!-- templates/track_result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Status - Book My Complaint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg');
+            background-size: cover;
+            min-height: 100vh;
+        }
+        .header { background: linear-gradient(135deg, #1a237e, #0d1b5e); color: white; padding: 15px 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin: 15px 0;
+        }
+        .status-Pending { background: #ff9800; color: white; }
+        .status-Under-Investigation { background: #2196f3; color: white; }
+        .status-Resolved { background: #4caf50; color: white; }
+        .timeline { margin: 20px 0; padding: 20px; background: #f5f5f5; border-radius: 10px; }
+        .back-link { display: inline-block; margin-top: 20px; color: #ff6f00; text-decoration: none; }
+        hr { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container" style="max-width: 1200px;"><h2>📋 Complaint Status</h2></div>
+    </div>
+    <div class="container">
+        <div class="result-card">
+            <h1>📄 Complaint Details</h1>
+            <p><strong>Complaint ID:</strong> {{ complaint.complaint_id }}</p>
+            <p><strong>Category:</strong> {{ complaint.category }}</p>
+            <p><strong>Date Filed:</strong> {{ complaint.created_at.strftime('%d-%m-%Y %H:%M') }}</p>
+            <p><strong>Description:</strong> {{ complaint.description }}</p>
+            <p><strong>Location:</strong> {{ complaint.address or 'Captured' }}</p>
+            <p><strong>Assigned To:</strong> {{ complaint.assigned_to }}</p>
+            
+            <div class="status-badge status-{{ complaint.status.replace(' ', '-') }}">
+                📌 Status: {{ complaint.status }}
+            </div>
+            
+            <div class="timeline">
+                <h3>📅 Timeline</h3>
+                <p><strong>Registered:</strong> {{ complaint.created_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                <p><strong>Last Updated:</strong> {{ complaint.updated_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                {% if complaint.remarks %}
+                    <hr>
+                    <p><strong>Official Remarks:</strong> {{ complaint.remarks }}</p>
+                {% endif %}
+            </div>
+            
+            {% if complaint.video_filename %}
+                <div>
+                    <h3>🎥 Evidence Video</h3>
+                    <video controls width="100%" src="{{ url_for('static', filename='uploads/' + complaint.video_filename) }}"></video>
+                </div>
+            {% endif %}
+            
+            <a href="/track-complaint" class="back-link">← Track Another Complaint</a>
+            <a href="/" class="back-link" style="margin-left: 20px;">🏠 Home</a>
+        </div>
+    </div>
+</body>
+</html>
