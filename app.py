@@ -9,10 +9,13 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'bookmycomplaint_secret_key_2024'
+app.secret_key = os.environ.get('SECRET_KEY', 'bookmycomplaint_secret_key_2024')
 
-# Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
+# Configuration — fix postgres:// to postgresql:// for SQLAlchemy compatibility
+_db_url = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
+if _db_url.startswith('postgres://'):
+    _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = _db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max for videos
@@ -376,31 +379,30 @@ def reset_demo():
         return jsonify({'success': True, 'message': 'Demo data added (police stations)'})
     else:
         return jsonify({'success': False, 'message': 'Stations already exist'})
+# ✅ This runs on BOTH Render and locally
 with app.app_context():
     db.create_all()
 
+    # Add sample police stations if none exist
+    if PoliceStation.query.count() == 0:
+        stations = [
+            PoliceStation(name='Koramangala Police Station', location_lat=12.9279, location_lng=77.6271,
+                         address='Koramangala, Bangalore', phone='080-25532211'),
+            PoliceStation(name='Indiranagar Police Station', location_lat=12.9784, location_lng=77.6408,
+                         address='Indiranagar, Bangalore', phone='080-25262211'),
+            PoliceStation(name='MG Road Police Station', location_lat=12.9752, location_lng=77.6068,
+                         address='MG Road, Bangalore', phone='080-25582211'),
+            PoliceStation(name='Whitefield Police Station', location_lat=12.9698, location_lng=77.7499,
+                         address='Whitefield, Bangalore', phone='080-28452211'),
+        ]
+        db.session.add_all(stations)
+        db.session.commit()
+
+    # Add default admin if none exists
+    if Admin.query.count() == 0:
+        admin = Admin(username='admin', password='admin@123', role='super_admin')
+        db.session.add(admin)
+        db.session.commit()
+
 if __name__ == '__main__':
-        # Add sample police stations if none exist
-        if PoliceStation.query.count() == 0:
-            stations = [
-                PoliceStation(name='Koramangala Police Station', location_lat=12.9279, location_lng=77.6271, 
-                             address='Koramangala, Bangalore', phone='080-25532211'),
-                PoliceStation(name='Indiranagar Police Station', location_lat=12.9784, location_lng=77.6408,
-                             address='Indiranagar, Bangalore', phone='080-25262211'),
-                PoliceStation(name='MG Road Police Station', location_lat=12.9752, location_lng=77.6068,
-                             address='MG Road, Bangalore', phone='080-25582211'),
-                PoliceStation(name='Whitefield Police Station', location_lat=12.9698, location_lng=77.7499,
-                             address='Whitefield, Bangalore', phone='080-28452211'),
-            ]
-            db.session.add_all(stations)
-            db.session.commit()
-        
-        # Add default admin if none exists
-        if Admin.query.count() == 0:
-            admin = Admin(username='admin', password='admin@123', role='super_admin')
-            db.session.add(admin)
-            db.session.commit()
-app.run(debug=False)
-    
-    
-    
+    app.run(debug=True, host='0.0.0.0', port=5000)
