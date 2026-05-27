@@ -1,5 +1,8 @@
 Flask
+flask-sqlalchemy
+psycopg2-binary       ← add this (for PostgreSQL)
 gunicorn
+werkzeug
 blinker==1.9.0
 click==8.3.3
 colorama==0.4.6
