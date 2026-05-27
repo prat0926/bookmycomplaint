@@ -383,6 +383,16 @@ def reset_demo():
 with app.app_context():
     db.create_all()
 
+    # ✅ Fix column sizes in existing PostgreSQL tables
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(db.text('ALTER TABLE complaint ALTER COLUMN complaint_id TYPE VARCHAR(50)'))
+            conn.execute(db.text('ALTER TABLE complaint ALTER COLUMN video_filename TYPE VARCHAR(500)'))
+            conn.commit()
+            print("Column sizes fixed!")
+    except Exception as e:
+        print(f"Column fix skipped: {e}")
+
     # Add sample police stations if none exist
     if PoliceStation.query.count() == 0:
         stations = [
