@@ -1,6 +1,6 @@
 Flask
 flask-sqlalchemy
-psycopg2-binary       ← add this (for PostgreSQL)
+psycopg2-binary   
 gunicorn
 werkzeug
 blinker==1.9.0
