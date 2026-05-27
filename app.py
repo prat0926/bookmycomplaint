@@ -378,8 +378,7 @@ def reset_demo():
         return jsonify({'success': False, 'message': 'Stations already exist'})
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
-        
+        db.create_all()  
         # Add sample police stations if none exist
         if PoliceStation.query.count() == 0:
             stations = [
@@ -400,5 +399,6 @@ if __name__ == '__main__':
             admin = Admin(username='admin', password='admin@123', role='super_admin')
             db.session.add(admin)
             db.session.commit()
-    
     app.run(debug=True, host='0.0.0.0', port=5000)
+    
+    
